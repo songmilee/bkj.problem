@@ -1,13 +1,4 @@
 package bkj.java;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-
 /*
  * 
 3
@@ -26,6 +17,11 @@ import java.util.Set;
 11
 
  * */
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
 public class P15685 {
 
 	public static void main(String[] args) throws Exception {
@@ -41,13 +37,13 @@ class Solution{
 	private int n;
 	private int cnt = 0;
 	private int dir[][] = {
-			{1, 0},
-			{0, -1},
-			{-1, 0},
-			{0, 1}
+			{1, 0}, // 0
+			{0, -1}, // 1
+			{-1, 0}, // 2
+			{0, 1}, // 3
 	};
-	private List<Point> dcList = new ArrayList<Point>();
-	
+	private boolean board[][] = new boolean[101][101];
+		
 	public Solution() throws Exception{
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		n = Integer.parseInt(br.readLine());
@@ -64,72 +60,42 @@ class Solution{
 	
 	public void createPointList(Point p, int direction, int generation) {
 		int pointSize = (int)(Math.pow(2, generation));
-
-		Point[] pointList = new Point[pointSize + 1];
-		pointList[pointSize] = p;
-
-		int curDir = direction;
-		visitPoint(pointList[pointSize]);
-
-		for(int i = pointSize - 1; i >=0; i--) {
-			Point prevp = pointList[i + 1];
-			int x = prevp.x + dir[curDir][0];
-			int y = prevp.y + dir[curDir][1];
-	
-			pointList[i] = new Point(x, y);
-			System.out.println(i+" "+x+" "+y);
-			switch(curDir) {
-			case 0:
-				curDir = 3;
-				break;
-			case 1:
-				curDir = 0;
-				break;
-			case 2:
-				curDir = 3;
-				break;
-			case 3:
-				curDir = 2;
-				break;
+				
+		List<Integer> roDir = new ArrayList<Integer>();
+		roDir.add(direction);
+		for(int i = 0; i < generation; i++) {
+			for(int j = roDir.size() - 1; j >= 0; j--) {
+				roDir.add((roDir.get(j) + 1) % 4);
 			}
-			
-			visitPoint(pointList[i]);
+		}
+
+		int x = p.x;
+		int y = p.y;
+		visitPoint(x, y);
+		for(int i = 1; i <= pointSize; i++) {
+			x += dir[roDir.get(i - 1)][0];
+			y += dir[roDir.get(i - 1)][1];
+			visitPoint(x, y);
+				
 		}
 		
 	}
 	
-	public void visitPoint(Point p) {
-		if(p.x > 100 || p.y > 100 || p.x < 0 || p.y < 0) return;
+	public void visitPoint(int x, int y) {
+		if(x > 100 || y > 100 || x < 0 || y < 0) return;
 		
-		if(!dcList.contains(p))
-			dcList.add(p);		
+		board[x][y]= true; 	
+//		System.out.println(x+" "+y);
 	}
 	
 	public void cntSquare() {
-		int squDir[][] = {
-				{-1, 0},
-				{0, 1},
-				{-1, 1}
-		};
 		
-
-		for(int i = 0; i < dcList.size(); i++) {
-			Point cur = dcList.get(i);
-			System.out.println(cur.x+" "+cur.y);
-			boolean isIn = true;
-			for(int k = 0; k < 3; k++) {
-				int x = cur.x + squDir[k][0];
-				int y = cur.y + squDir[k][1];
-				
-				Point testPoint = new Point(x, y);
-				boolean isContain = dcList.contains(testPoint);
-				if(x < 0 || y < 0 || x > 100 || y > 100 || !isContain) {
-					isIn = false;
-					break;
-				}
+		for(int i = 0; i <= 100; i++) {
+			for(int j = 0; j <= 100; j++) {
+				if(i -1 >=0 && i -1 <= 100 && j-1 >= 0 && j <= 100)
+					if(board[i][j] && board[i - 1][j] && board[i][j -1] && board[i-1][j-1])
+						cnt++;
 			}
-			
-			if(isIn) cnt++;
 		}
 		
 	}
